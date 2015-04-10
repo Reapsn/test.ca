@@ -1,5 +1,7 @@
 package test.ca;
 
+import java.util.Scanner;
+
 import test.ca.cert.CertUtils;
 
 public class CaMain {
@@ -10,12 +12,19 @@ public class CaMain {
 			CertUtils.genRootCert(CertUtils.ISSUER);
 		}
 		
-		if(args.length > 0) {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("请输入 name:");
+		String input = scanner.next();
+		while(!"q!".equals(input)) {
 			System.out.println("【签名证书】");
-			System.out.println(CertUtils.genSignCert(args[0]));
+			System.out.println(CertUtils.genSignCert(input));
 			System.out.println("【加密证书】");
-			System.out.println(CertUtils.genCipherCert(args[0]));
+			System.out.println(CertUtils.genCipherCert(input));
+			
+			System.out.print("请输入 name:");
+			input = scanner.next();
 		}
+		scanner.close();
 	}
 	
 }

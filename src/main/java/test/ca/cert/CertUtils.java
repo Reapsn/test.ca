@@ -29,11 +29,16 @@ public class CertUtils {
 	public static final String ISSUER = "C=CN,ST=SH,L=SH,O=Koal,OU=Koal,CN=TestCA";
 	public static final String BASE_SUBJECT = "C=CN,ST=SH,L=SH,O=Koal,OU=Koal,CN=";
 	public static final char[] KEY_STORE_PASSWORD = "".toCharArray();
-	public static final char[] ROOT_KEY_PASSWORD = "".toCharArray();
 	public static final String ROOT_ALIAS = "root";
+	public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
+	public static final String PKCS12= "PKCS12";
 	
 	static {
 		CERT_STORE = PathUtils.findHomePath() + File.separatorChar + "store";
+		File store = new File(CERT_STORE);
+		if (!store.exists()) {
+			store.mkdir();
+		}
 		PFX_ROOT_CERT = CERT_STORE + File.separatorChar + "root.pfx";
 		ROOT_CERT = CERT_STORE + File.separatorChar + "root.cer";
 	}
@@ -63,16 +68,16 @@ public class CertUtils {
         // 公钥  
         certGen.setPublicKey(pubKey);
         // 签名算法  
-        certGen.setSignatureAlgorithm("SHA256WithRSA"); 
+        certGen.setSignatureAlgorithm(SIGNATURE_ALGORITHM); 
         Certificate certificate = certGen.generate(getRootPrivateKey());
 		
         // 保存证书
         String pfxFile = CERT_STORE + File.separatorChar + name + ".sign.pfx";
         char[] password = "12345678".toCharArray();
         FileOutputStream output = new FileOutputStream(pfxFile);
-		KeyStore outputKeyStore = KeyStore.getInstance("PKCS12");
+		KeyStore outputKeyStore = KeyStore.getInstance(PKCS12);
 		outputKeyStore.load(null, password);
-		outputKeyStore.setKeyEntry(name, priKey, ROOT_KEY_PASSWORD,
+		outputKeyStore.setKeyEntry(name, priKey, password,
 				new Certificate[] { certificate });
 		outputKeyStore.store(output, password);
         output.close();
@@ -101,16 +106,16 @@ public static Certificate genCipherCert(String name) throws Exception {
         // 公钥  
         certGen.setPublicKey(pubKey);
         // 签名算法  
-        certGen.setSignatureAlgorithm("SHA256WithRSA"); 
+        certGen.setSignatureAlgorithm(SIGNATURE_ALGORITHM); 
         Certificate certificate = certGen.generate(getRootPrivateKey());
 		
         // 保存证书
         String pfxFile = CERT_STORE + File.separatorChar + name + ".cipher.pfx";
         char[] password = "12345678".toCharArray();
         FileOutputStream output = new FileOutputStream(pfxFile);
-		KeyStore outputKeyStore = KeyStore.getInstance("PKCS12");
+		KeyStore outputKeyStore = KeyStore.getInstance(PKCS12);
 		outputKeyStore.load(null, password);
-		outputKeyStore.setKeyEntry(name, priKey, ROOT_KEY_PASSWORD,
+		outputKeyStore.setKeyEntry(name, priKey, password,
 				new Certificate[] { certificate });
 		outputKeyStore.store(output, password);
         output.close();
@@ -138,14 +143,14 @@ public static Certificate genCipherCert(String name) throws Exception {
         // 公钥  
         certGen.setPublicKey(pubKey);  
         // 签名算法  
-        certGen.setSignatureAlgorithm("SHA256WithRSA"); 
+        certGen.setSignatureAlgorithm(SIGNATURE_ALGORITHM); 
         Certificate rootCert = certGen.generate(priKey);
 		
         // 保存根证书
         FileOutputStream output = new FileOutputStream(PFX_ROOT_CERT);
-		KeyStore outputKeyStore = KeyStore.getInstance("PKCS12");
+		KeyStore outputKeyStore = KeyStore.getInstance(PKCS12);
 		outputKeyStore.load(null, KEY_STORE_PASSWORD);
-		outputKeyStore.setKeyEntry(ROOT_ALIAS, priKey, ROOT_KEY_PASSWORD,
+		outputKeyStore.setKeyEntry(ROOT_ALIAS, priKey, KEY_STORE_PASSWORD,
 				new Certificate[] { rootCert });
 		outputKeyStore.store(output, KEY_STORE_PASSWORD);
         output.close();
@@ -156,7 +161,7 @@ public static Certificate genCipherCert(String name) throws Exception {
 	public static Certificate getRootCert() {
 		Certificate rootCert = null;
 		try {
-			KeyStore inputKeyStore = KeyStore.getInstance("PKCS12");
+			KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
 			FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
 			inputKeyStore.load(fis, KEY_STORE_PASSWORD);
 			fis.close();
@@ -164,7 +169,8 @@ public static Certificate genCipherCert(String name) throws Exception {
 			rootCert = inputKeyStore.getCertificate(ROOT_ALIAS);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			// ignore
 		}
 		return rootCert;
 	}
@@ -173,15 +179,16 @@ public static Certificate genCipherCert(String name) throws Exception {
 		PrivateKey privateKey = null;
 		try {
 
-			KeyStore inputKeyStore = KeyStore.getInstance("PKCS12");
+			KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
 			FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
 			inputKeyStore.load(fis, KEY_STORE_PASSWORD);
 			fis.close();
 
-			privateKey = (PrivateKey) inputKeyStore.getKey(ROOT_ALIAS, ROOT_KEY_PASSWORD);
+			privateKey = (PrivateKey) inputKeyStore.getKey(ROOT_ALIAS, KEY_STORE_PASSWORD);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			// ignore
 		}
 		return privateKey;
 	}
