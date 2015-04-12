@@ -32,6 +32,8 @@ public class CertUtils {
 	public static final String ROOT_ALIAS = "root";
 	public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
 	public static final String PKCS12= "PKCS12";
+	public static final String SIGN_PFX = ".sign.pfx";
+	public static final String CIPHER_PFX = ".cipher.pfx";
 	
 	static {
 		CERT_STORE = PathUtils.findHomePath() + File.separatorChar + "store";
@@ -49,7 +51,6 @@ public class CertUtils {
 		keyPairGenerator.initialize(1024);
 		
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		// HttpUtils.RequestKeyPair("root", 2048, false);
 		
 		// 公钥  
         PublicKey pubKey = keyPair.getPublic();  
@@ -72,14 +73,13 @@ public class CertUtils {
         Certificate certificate = certGen.generate(getRootPrivateKey());
 		
         // 保存证书
-        String pfxFile = CERT_STORE + File.separatorChar + name + ".sign.pfx";
-        char[] password = "12345678".toCharArray();
+        String pfxFile = CERT_STORE + File.separatorChar + name + SIGN_PFX;
         FileOutputStream output = new FileOutputStream(pfxFile);
 		KeyStore outputKeyStore = KeyStore.getInstance(PKCS12);
-		outputKeyStore.load(null, password);
-		outputKeyStore.setKeyEntry(name, priKey, password,
+		outputKeyStore.load(null, KEY_STORE_PASSWORD);
+		outputKeyStore.setKeyEntry(name, priKey, KEY_STORE_PASSWORD,
 				new Certificate[] { certificate });
-		outputKeyStore.store(output, password);
+		outputKeyStore.store(output, KEY_STORE_PASSWORD);
         output.close();
         
 		return certificate;
@@ -110,14 +110,13 @@ public static Certificate genCipherCert(String name) throws Exception {
         Certificate certificate = certGen.generate(getRootPrivateKey());
 		
         // 保存证书
-        String pfxFile = CERT_STORE + File.separatorChar + name + ".cipher.pfx";
-        char[] password = "12345678".toCharArray();
+        String pfxFile = CERT_STORE + File.separatorChar + name + CIPHER_PFX;
         FileOutputStream output = new FileOutputStream(pfxFile);
 		KeyStore outputKeyStore = KeyStore.getInstance(PKCS12);
-		outputKeyStore.load(null, password);
-		outputKeyStore.setKeyEntry(name, priKey, password,
+		outputKeyStore.load(null, KEY_STORE_PASSWORD);
+		outputKeyStore.setKeyEntry(name, priKey, KEY_STORE_PASSWORD,
 				new Certificate[] { certificate });
-		outputKeyStore.store(output, password);
+		outputKeyStore.store(output, KEY_STORE_PASSWORD);
         output.close();
         
 		return certificate;
@@ -158,20 +157,15 @@ public static Certificate genCipherCert(String name) throws Exception {
         FileUtils.writeByteArrayToFile(new File(ROOT_CERT), rootCert.getEncoded());
 	}
 	
-	public static Certificate getRootCert() {
-		Certificate rootCert = null;
-		try {
-			KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
-			FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
-			inputKeyStore.load(fis, KEY_STORE_PASSWORD);
-			fis.close();
-			
-			rootCert = inputKeyStore.getCertificate(ROOT_ALIAS);
-			
-		} catch (Exception e) {
-			// e.printStackTrace();
-			// ignore
-		}
+	public static Certificate getRootCert() throws Exception {
+		
+		KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
+		FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
+		inputKeyStore.load(fis, KEY_STORE_PASSWORD);
+		fis.close();
+
+		Certificate rootCert = inputKeyStore.getCertificate(ROOT_ALIAS);
+
 		return rootCert;
 	}
 	
@@ -191,5 +185,29 @@ public static Certificate genCipherCert(String name) throws Exception {
 			// ignore
 		}
 		return privateKey;
+	}
+	
+	public static Certificate readSignCert(String name) throws Exception {
+		KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
+		FileInputStream fis = new FileInputStream(CERT_STORE
+				+ File.separatorChar + name + SIGN_PFX);
+		inputKeyStore.load(fis, KEY_STORE_PASSWORD);
+		fis.close();
+
+		Certificate cert = inputKeyStore.getCertificate(name);
+
+		return cert;
+	}
+	
+	public static Certificate readCipherCert(String name) throws Exception {
+		KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
+		FileInputStream fis = new FileInputStream(CERT_STORE
+				+ File.separatorChar + name + CIPHER_PFX);
+		inputKeyStore.load(fis, KEY_STORE_PASSWORD);
+		fis.close();
+
+		Certificate cert = inputKeyStore.getCertificate(name);
+		
+		return cert;
 	}
 }
