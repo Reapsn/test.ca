@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import test.ca.util.StringUtils;
+
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException; 
@@ -77,7 +79,7 @@ public class LdapUtils {
 			throws Exception {
 		X509Certificate cert = (X509Certificate) certificate;
 		String certDn = cert.getSubjectDN().getName();
-		String certCn = getValueFromDn(certDn, "CN");
+		String certCn = StringUtils.getValueFromDn(certDn, "CN");
 		String dn = "cn=" + certCn + "," + CERT_PATH;
 		List<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(new Attribute("cn", certCn));
@@ -85,21 +87,5 @@ public class LdapUtils {
 		attributes.add(new Attribute("userCertificate;binary", cert.getEncoded()));
 		attributes.add(new Attribute("objectClass", "top", "person","pkiUser"));
 		return addOneNode(dn, attributes);
-	}
-	
-	public static String getValueFromDn(String dn, String name) {
-		if(dn == null) {
-			throw new IllegalArgumentException("dn must not be null");
-		}
-		String value = null;
-		String[] nameValues = dn.replaceAll("[\\s]", "").split(",");
-		for (int i = 0; i < nameValues.length; i++) {
-			String[] nameValue = nameValues[i].split("=");
-			if (nameValue[0].equals(name)) {
-				value = nameValue[1];
-				break;
-			}
-		}
-		return value;
 	}
 }

@@ -30,11 +30,11 @@ public class HttpUtils {
 		httpPost.setHeader("Accept", "text");
 		httpPost.setHeader("Connection", "keep-alive");
 		
+		String data = String.format("name=%s,length=%d,gennewkey=%s", name, length, genNewKey);
 		List<NameValuePair> values = new ArrayList<NameValuePair>();
-		values.add(new BasicNameValuePair("name", name));
-		values.add(new BasicNameValuePair("length", length + ""));
-		values.add(new BasicNameValuePair("gennewkey", genNewKey + ""));
-
+		values.add(new BasicNameValuePair("data", Base64.getEncoder()
+				.encodeToString(CipherUtils.encrypt(data.getBytes()))));
+		
 		httpPost.setEntity(new UrlEncodedFormEntity(values, "UTF-8"));  //进行转码
 		
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
