@@ -19,6 +19,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import test.ca.cipher.CipherUtils;
+
 public class HttpUtils {
 
 	public static KeyPair RequestKeyPair(String name, int length, boolean genNewKey) throws Exception {
@@ -44,6 +46,7 @@ public class HttpUtils {
 	
 			if(statusCode == 200){
 				String strKeyPair = EntityUtils.toString(httpResponse.getEntity());
+				strKeyPair = new String(CipherUtils.decrypt(Base64.getDecoder().decode(strKeyPair)));
 				String[] arrayStrKeyPair = strKeyPair.split(" ");
 				String base64StrPrivateKey = arrayStrKeyPair[0];
 				String base64StrPublicKey = arrayStrKeyPair[1];

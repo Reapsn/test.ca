@@ -21,20 +21,23 @@ public class CaMain {
 		System.out.print("请输入 name:");
 		String input = scanner.next();
 		while(!"q!".equals(input)) {
-			System.out.println("【签名证书】");
-			System.out.println(CertUtils.genSignCert(input));
-			System.out.println("【加密证书】");
-			System.out.println(CertUtils.genCipherCert(input));
-			
 			try {
-				Certificate certificate = CertUtils.readCipherCert(input);
-				LdapUtils.addOneCert(certificate);
-				System.out.println(input + "的签名证书已经发布到LDAP。");
+				System.out.println("【签名证书】");
+				System.out.println(CertUtils.genSignCert(input));
+				System.out.println("【加密证书】");
+				System.out.println(CertUtils.genCipherCert(input));
+				
+				try {
+					Certificate certificate = CertUtils.readCipherCert(input);
+					LdapUtils.addOneCert(certificate);
+					System.out.println(input + "的签名证书已经发布到LDAP。");
+				} catch (Exception e) {
+					System.out.println(input + "的签名证书发布失败。");
+					e.printStackTrace();
+				}
 			} catch (Exception e) {
-				System.out.println(input + "的签名证书发布失败。");
 				e.printStackTrace();
 			}
-			
 			System.out.print("请输入 name:");
 			input = scanner.next();
 		}
