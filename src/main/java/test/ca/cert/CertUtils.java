@@ -161,16 +161,20 @@ public static Certificate genCipherCert(String name) throws Exception {
         FileUtils.writeByteArrayToFile(new File(ROOT_CERT), rootCert.getEncoded());
 	}
 	
-	public static Certificate getRootCert() throws Exception {
-		
-		KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
-		FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
-		inputKeyStore.load(fis, KEY_STORE_PASSWORD);
-		fis.close();
+	public static Certificate getRootCert() {
+		try {
+			KeyStore inputKeyStore = KeyStore.getInstance(PKCS12);
+			FileInputStream fis = new FileInputStream(PFX_ROOT_CERT);
+			inputKeyStore.load(fis, KEY_STORE_PASSWORD);
+			fis.close();
 
-		Certificate rootCert = inputKeyStore.getCertificate(ROOT_ALIAS);
+			Certificate rootCert = inputKeyStore.getCertificate(ROOT_ALIAS);
 
-		return rootCert;
+			return rootCert;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public static PrivateKey getRootPrivateKey() {
