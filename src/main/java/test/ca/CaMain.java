@@ -13,7 +13,9 @@ public class CaMain {
 		if (CertUtils.getRootCert() == null) {
 			CertUtils.genRootCert(CertUtils.ISSUER);			
 		}
-//		LdapUtils.addOrganizationalUnit(LdapUtils.BASE_DIR, "Certificates");
+		if (LdapUtils.queryLdap(LdapUtils.BASE_DIR, "ou=Certificates").size() < 1) {
+			LdapUtils.addOrganizationalUnit(LdapUtils.BASE_DIR, "Certificates");
+		}
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.print("请输入 name:");

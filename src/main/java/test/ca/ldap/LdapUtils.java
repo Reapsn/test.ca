@@ -3,7 +3,6 @@ package test.ca.ldap;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,9 +18,9 @@ import com.unboundid.ldap.sdk.SearchScope;
 public class LdapUtils {
 
 	public static String LDAP ="ldap";
-	public static String HOST = "192.168.111.3";
+	public static String HOST = "192.168.40.82";
 	public static int PORT = 389;
-	public static String BASE_DIR = "dc=spinlock,dc=hr";
+	public static String BASE_DIR = "dc=test,dc=net";
 	public static String ADMIN_COUNT_DN = "cn=admin," +BASE_DIR;
 	public static String ADMIN_PASSWORD = "1234";
 	public static String CERT_PATH = "ou=Certificates," + BASE_DIR;
@@ -78,13 +77,12 @@ public class LdapUtils {
 			throws Exception {
 		X509Certificate cert = (X509Certificate) certificate;
 		String certDn = cert.getSubjectDN().getName();
-		String certCn = getValueFromDn(certDn, "CN") + "1";
+		String certCn = getValueFromDn(certDn, "CN");
 		String dn = "cn=" + certCn + "," + CERT_PATH;
 		List<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(new Attribute("cn", certCn));
 		attributes.add(new Attribute("sn", cert.getSerialNumber() + ""));
-		byte[] b64Cert = Base64.getEncoder().encode(cert.getEncoded());
-		attributes.add(new Attribute("userCertificate;binary", b64Cert));
+		attributes.add(new Attribute("userCertificate;binary", cert.getEncoded()));
 		attributes.add(new Attribute("objectClass", "top", "person","pkiUser"));
 		return addOneNode(dn, attributes);
 	}
