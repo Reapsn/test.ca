@@ -1,11 +1,15 @@
 package test.ca.cipher;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CipherUtils {
 	
@@ -60,5 +64,29 @@ public class CipherUtils {
 		// 正式执行解操作
 		return cipher.doFinal(encryptedData);
 
+	}
+	
+	public static boolean keyTest(PublicKey pubKey, PrivateKey priKey,
+			String data) throws Exception {
+
+		Cipher cipher = Cipher.getInstance("RSA", new BouncyCastleProvider());
+		cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+
+		System.out.println("【密钥对测试】");
+		System.out.println("明文 " + data);
+		byte[] encrptedData = cipher.doFinal(data.getBytes());
+		System.out.println("密文 " + new String(encrptedData));
+
+		cipher.init(Cipher.DECRYPT_MODE, priKey);
+		String strDecryptedData = new String(cipher.doFinal(encrptedData));
+		System.out.println("解密 " + strDecryptedData);
+
+		if (strDecryptedData.equals(data)) {
+			System.out.println("密钥对可用。");
+			return true;
+		} else {
+			System.out.println("密钥对不可用。");
+			return false;
+		}
 	}
 }

@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
+import test.ca.cipher.CipherUtils;
 import test.ca.util.HttpUtils;
 import test.ca.util.PathUtils;
 
@@ -92,7 +93,10 @@ public static Certificate genCipherCert(String name) throws Exception {
 		// 公钥  
         PublicKey pubKey = keyPair.getPublic();  
         // 私钥  
-        PrivateKey priKey = keyPair.getPrivate(); 
+        PrivateKey priKey = keyPair.getPrivate();
+        if (!CipherUtils.keyTest(pubKey, priKey, name)) {
+        	throw new Exception("密钥对无效。");
+        }
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();  
         // 设置序列号  
         certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));  
